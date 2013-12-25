@@ -1,0 +1,28 @@
+[2013-02-20]
+
+This protocol extracts 16S reads from WGS metagenomes and assigns both ends to a certain OTU in greengene database.
+
+## Steps of this protocol:
+1. Run a probing blastn against a probe 16S sequence (e.g., the probe.fa file in this folder has E.coli K-12 16S sequence), and save the m8 format blast output as foo.bls, filter the results as you prefer (e-value, bit-score, etc);
+2. run perl extractPaired.pl foo.bls   this will give you all the results that both ends mapped to 16S.
+3. extract the sequences from your original read files (or trimmed reads) using the reads that were selected in step 2; save the extracted reads in file foo.PE.fa;
+You can use the script extractSeq.pl to accomplish this step, you might need to modify the script a bit to fit your read's tag naming format though:
+perl extractSeq.pl foo.PE.bls foo.read.fa foo.PE.fa
+where foo.PE.bls is the output from step 2, foo.read.fa is the original read fasta file, and foo.PE.fa is the extracted reads in fasta format;
+4. run blastn search using foo.PE.fa against GreenGene representative seq DB clustered at 99% nt identity (NOTE: use -m 8 -b 1 -v 1), save the m8 blastn output file (filtered using e-value, bit-scores as you prefer) as foo.PE.vs.GG99.bls;
+5. assign taxonomy information to blastn output from step 4; run perl taxoAssign.pl foo.PE.vs.GG99.bls greengenes_tax.txt foo.PE.vs.GG99.tax; the annotated results are saved in foo.PE.vs.GG99.tax;
+6. run perl taxoFilter.pl foo.PE.vs.GG99.tax foo.PE.vs.GG99.selected.tax to extract results that both ends hit the same OTU (the script filters at Order level now; to change to another level, for instance, genus level, edit the regex in the script, change all o's into g's);
+7. The sequences in the output from step 6 are those you are looking for. Repeat the fastA read extraction in step 3, you will have the 16S read sequences in fasta format.
+
+## Visualize the 16S mapping
+in ./Viz/ we have several utility scripts that help you to visualize the 16S reads mapping to a reference gene, and it could guide your selection of regions of interest.
+
+Note: you will need matplotlib to visualize the results.
+command line:
+python ./Viz/drawMapping.py probe.fa foo.bls foo.mapping.eps
+
+You can replace probe.fa with anyothe reference 16S gene you like, here I use the E.coli K-12 16S gene an example; foo.bls is the -m8 blastn search output file, and foo.mapping.eps is the ouput figure you desire to generate in EPS format.
+
+Happy hacking!
+
+-- Chengwei "Alex" Luo
