@@ -109,11 +109,14 @@ def main():
 		
 		if species_name.count('/') > 0:
 			species_name = species_name.replace('/', '_', 10)
-		outfile = options.out_dir + '/species.' + str(species_id) + '.' + species_name.replace(' ', '_', 100) + '.txt'
+		subdir = options.out_dir + '/species.' + str(int(species_id) % 9 + 1)
+		if not os.path.exists(subdir):
+			os.mkdir(subdir)
+		outfile = subdir + '/' + str(species_id) + '.' + species_name.replace(' ', '_', 100) + '.txt'
 		if species_id not in ofhs['species']:
 			try:
 				ofhs['species'][species_id] = open(outfile, 'a')
-			except OSError:
+			except IOError:
 				for sp in ofhs['species']:
 					if sp == species_id:
 						continue
