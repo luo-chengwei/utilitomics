@@ -64,7 +64,7 @@ def main():
 	taxonomy_dict = {}
 	bfh = pysam.Samfile(options.bam, 'rb')
 	for ref in bfh.references:
-		seq_id, taxid, type = bfh.getrname(ref).split('.')
+		seq_id, taxid, type = ref.split('.')
 		if type != 'g':
 			continue
 		species_id, species_name = tTree.getRankWithTaxonID(taxid, 'species')
