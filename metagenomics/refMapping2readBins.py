@@ -106,7 +106,9 @@ def main():
 			else:
 				ofhs['unknown'].write('%s#2_%s\t%s\t%s\n' % (read.qname, taxid, read.seq, read.qual))
 			continue
-			
+		
+		if species_name.count('/') > 0:
+			species_name = species_name.replace('/', '_', 10)
 		outfile = options.out_dir + '/species.' + str(species_id) + '.' + species_name.replace(' ', '_', 100) + '.txt'
 		if species_id not in ofhs['species']:
 			try:
