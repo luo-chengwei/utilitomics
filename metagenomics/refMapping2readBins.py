@@ -57,22 +57,7 @@ def main():
 		import shutil
 		shutil.rmtree(options.out_dir)
 		os.mkdir(options.out_dir)
-	sys.stdout.write('Done.\n')
-	
-	
-	sys.stdout.write('Initializing taxonomy dict...\n')
-	taxonomy_dict = {}
-	bfh = pysam.Samfile(options.bam, 'rb')
-	for ref in bfh.references:
-		seq_id, taxid, type = ref.split('.')
-		if type != 'g':
-			continue
-		if taxid not in taxonomy_dict:
-			species_id, species_name = tTree.getRankWithTaxonID(taxid, 'species')
-			taxonomy_dict[taxid] = [species_id, species_name]
-	bfh.close()
-	sys.stdout.write('Done.\n')
-		
+	sys.stdout.write('Done.\n')	
 		
 	sys.stdout.write('Categorizing reads...\n')	
 	ofhs = {}
@@ -82,7 +67,7 @@ def main():
 	ofhs['unknown'] = open(options.out_dir + '/unknown.txt', 'a')
 	ofhs['species'] = {}
 	
-	
+	taxonomy_dict = {}
 	bfh = pysam.Samfile(options.bam, 'rb')
 	for read in bfh.fetch(until_eof = True):
 		if read.is_unmapped:
@@ -110,6 +95,10 @@ def main():
 				ofhs['virus'].write('%s#2_%s\t%s\t%s\n' % (read.qname, taxid, read.seq, read.qual))
 			continue
 		
+		if taxid not in taxonomy_dict:
+			species_id, species_name = tTree.getRankWithTaxonID(taxid, 'species')
+			taxonomy_dict[taxid] = [species_id, species_name]
+			
 		species_id, species_name = taxonomy_dict[taxid]
 		if species_id == None:
 			if read.is_read1:
