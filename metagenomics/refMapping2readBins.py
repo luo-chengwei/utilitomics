@@ -50,13 +50,31 @@ def main():
 	sys.stdout.write('Done.\n')
 	
 	# init output space
+	sys.stdout.write('Initializing output dir...\n')
 	if not os.path.exists(options.out_dir):
 		os.mkdir(options.out_dir)
 	else:
 		import shutil
 		shutil.rmtree(options.out_dir)
 		os.mkdir(options.out_dir)
+	sys.stdout.write('Done.\n')
+	
+	
+	sys.stdout.write('Initializing taxonomy dict...\n')
+	taxonomy_dict = {}
+	bfh = pysam.Samfile(options.bam, 'rb')
+	for ref in bfh.references:
+		seq_id, taxid, type = bfh.getrname(ref).split('.')
+		if type != 'g':
+			continue
+		species_id, species_name = tTree.getRankWithTaxonID(taxid, 'species')
+		if taxid not in taxonomy_dict:
+			taxonomy_dict[taxid] = [species_id, species_name]
+	bfh.close()
+	sys.stdout.write('Done.\n')
 		
+		
+	sys.stdout.write('Categorizing reads...\n')	
 	ofhs = {}
 	ofhs['plasmid'] = open(options.out_dir + '/plasmids.txt', 'a')
 	ofhs['virus'] = open(options.out_dir + '/virus.txt', 'a')
@@ -66,7 +84,6 @@ def main():
 	
 	
 	bfh = pysam.Samfile(options.bam, 'rb')
-	i = 0
 	for read in bfh.fetch(until_eof = True):
 		if read.is_unmapped:
 			if read.is_read1:
@@ -93,7 +110,7 @@ def main():
 				ofhs['virus'].write('%s#2_%s\t%s\t%s\n' % (read.qname, taxid, read.seq, read.qual))
 			continue
 		
-		species_id, species_name = tTree.getRankWithTaxonID(taxid, 'species')
+		species_id, species_name = taxonomy_dict[taxid]
 		if species_id == None:
 			if read.is_read1:
 				ofhs['unknown'].write('%s#1_%s\t%s\t%s\n' % (read.qname, taxid, read.seq, read.qual))
@@ -131,6 +148,7 @@ def main():
 			ofh.write('%s#2_%s\t%s\t%s\n' % (read.qname, taxid, read.seq, read.qual))
 		
 	bfh.close()
+	sys.stdout.write('Done.\n')
 		
 if __name__ == '__main__':
 	main()
