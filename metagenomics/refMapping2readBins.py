@@ -67,8 +67,8 @@ def main():
 		seq_id, taxid, type = ref.split('.')
 		if type != 'g':
 			continue
-		species_id, species_name = tTree.getRankWithTaxonID(taxid, 'species')
 		if taxid not in taxonomy_dict:
+			species_id, species_name = tTree.getRankWithTaxonID(taxid, 'species')
 			taxonomy_dict[taxid] = [species_id, species_name]
 	bfh.close()
 	sys.stdout.write('Done.\n')
