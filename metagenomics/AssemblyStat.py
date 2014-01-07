@@ -29,6 +29,7 @@ def assemblyStat(infile):
 		if acc_length >= 0.75 * totalLength and n75 == 0:
 			n75 = x
 	GC = 100 * float(GC_count)/totalLength
+	print GC
 	return (GC, totalLength, len(lengths), max_contig, n25, n50, n75)
 
 
