@@ -35,7 +35,7 @@ def assemblyStat(infile):
 
 def main():
 	GC, totalLength, num_contigs, max_contig, n25, n50, n75 = assemblyStat(sys.argv[1])
-	sys.stdout.write('GC\%: %.4f\n' % GC)
+	sys.stdout.write('GC: %.4f\n' % GC)
 	sys.stdout.write('Total length: %i\n' % totalLength)
 	sys.stdout.write('Number of contigs: %i\n' % num_contigs)
 	sys.stdout.write('Max contig length: %i\n' % max_contig)
