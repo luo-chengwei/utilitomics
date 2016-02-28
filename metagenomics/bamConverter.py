@@ -24,7 +24,6 @@ import sys
 import os
 import glob
 from optparse import OptionParser, OptionGroup
-import pysam
 
 
 def main(argv = sys.argv[1:]):
@@ -38,12 +37,19 @@ def main(argv = sys.argv[1:]):
 				
 	reqOpts.add_option('-o', '--out_prefix', metavar = "STRING",
 				help = "The outputfile prefix")
+	
+	reqOpts.add_option('-f', '--format', metavar = "STRING", default = 'fastq',
+				help = "The output file format, has to be \"fastq\", \"fasta\", or \"interleaved_fasta\"")
+	
 				
 	parser.add_option_group(reqOpts)
 	
 	(options, args) = parser.parse_args(argv)
 	
-	
+	if options.format not in ['fastq', 'fasta', 'interleaved_fasta']:
+		parser.error('[FATAL]: the file format has to be \"fastq\", \"fasta\", or \"interleaved_fasta\"')
+		exit(1)
+
 	if options.infile is None:
 		parser.error("Infile must be supplied!")
 		exit(1)
@@ -54,9 +60,6 @@ def main(argv = sys.argv[1:]):
 		
 	bamFile = options.infile
 	bamfh = pysam.Samfile(bamFile,'rb')
-	ofh1 = open(options.out_prefix+'.PE.1.fa','w')
-	ofh2 = open(options.out_prefix+'.PE.2.fa','w')
-	readIter = bamfh.fetch(until_eof = True)
 	for read in readIter:
 		if read.is_read1:
 			sys.stdout.write('>%s\n%s\n' % (read.qname, read.seq))
